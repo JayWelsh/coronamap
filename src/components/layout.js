@@ -5,6 +5,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 
 import Header from "./header"
 import "./layout.css"
+import "./leaflet.css"
 
 const Layout = ({ children, totalCases }) => {
   const data = useStaticQuery(graphql`

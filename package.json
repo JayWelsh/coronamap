@@ -1,0 +1,51 @@
+{
+  "name": "coronamap",
+  "version": "0.0.1",
+  "description": "Provincial Coronavirus Distribution Map of South Africa",
+  "main": "index.js",
+  "dependencies": {
+    "@material-ui/core": "^4.9.5",
+    "@material-ui/icons": "^4.9.1",
+    "gatsby": "^2.19.7",
+    "gatsby-image": "^2.2.39",
+    "gatsby-plugin-manifest": "^2.2.39",
+    "gatsby-plugin-offline": "^3.0.32",
+    "gatsby-plugin-react-helmet": "^3.1.21",
+    "gatsby-plugin-react-leaflet": "^2.0.12",
+    "gatsby-plugin-s3": "^0.3.2",
+    "gatsby-plugin-sharp": "^2.4.3",
+    "gatsby-source-filesystem": "^2.1.46",
+    "gatsby-transformer-sharp": "^2.3.13",
+    "leaflet": "^1.6.0",
+    "papaparse": "^5.1.1",
+    "prop-types": "^15.7.2",
+    "react": "^16.13.0",
+    "react-dom": "^16.12.0",
+    "react-helmet": "^5.2.1",
+    "react-leaflet": "^2.6.3"
+  },
+  "devDependencies": {
+    "gatsby-plugin-force-trailing-slashes": "^1.0.4",
+    "prettier": "^1.19.1"
+  },
+  "scripts": {
+    "build": "gatsby build",
+    "develop": "gatsby develop",
+    "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
+    "start": "npm run develop",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean",
+    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1",
+    "deploy": "npm run build && gatsby-plugin-s3 deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/revolution0x/coronamap.git"
+  },
+  "author": "Jay Welsh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/revolution0x/coronamap/issues"
+  },
+  "homepage": "https://github.com/revolution0x/coronamap#readme"
+}

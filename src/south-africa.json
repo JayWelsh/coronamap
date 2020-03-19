@@ -1,0 +1,41 @@
+{
+    "population": 59308690,
+    "provinces": {
+        "EC": {
+            "name": "Eastern Cape",
+            "position": [-32.036184, 26.757324]
+        },
+        "FS": {
+            "name": "Free State",
+            "position": [-28.255198, 27.122523]
+        },
+        "GP": {
+            "name": "Gauteng",
+            "position": [-26.046737, 28.105546]
+        },
+        "KZN": {
+            "name": "KwaZulu-Natal",
+            "position": [-28.619194, 30.865210]
+        },
+        "LP": {
+            "name": "Limpopo",
+            "position": [-23.894138, 29.449859]
+        },
+        "MP": {
+            "name": "Mpumalanga",
+            "position": [-25.786438, 30.355040]
+        },
+        "NC": {
+            "name": "Northern Cape",
+            "position": [-29.709108, 21.321185]
+        },
+        "NW": {
+            "name": "North-West",
+            "position": [-26.422804, 25.750603]
+        },
+        "WC": {
+            "name": "Western Cape",
+            "position": [-33.493061, 20.580457]
+        }
+    }
+}

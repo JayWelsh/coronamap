@@ -636,7 +636,7 @@ pre tt:after {
 }
 
 .leaflet-container {
-  background-color:rgb(38, 38, 38);
+  background-color:rgb(38, 38, 38)!important;
 }
 
 .logo-container {

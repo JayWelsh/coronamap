@@ -20,8 +20,8 @@ const IndexPage = () => {
   let position = [-28.738176, 24.767929];
   let options = {
     style: {
-      height: 'calc(100vh - 64px)',
-      width: '100%'
+      height: isConsideredMobile() ? 'calc(var(--vh, 1vh) * 100 - 56px)' : 'calc(var(--vh, 1vh) * 100 - 64px)',
+      width: '100%',
     },
     center: position,
     zoom: isConsideredMobile() ? 4.5 : 6,

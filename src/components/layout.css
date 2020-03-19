@@ -635,10 +635,6 @@ pre tt:after {
   justify-content: space-between;
 }
 
-.leaflet-container {
-  background-color:rgb(38, 38, 38)!important;
-}
-
 .logo-container {
   max-height: 60px;
 }
@@ -679,4 +675,8 @@ pre tt:after {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.fullheight-minus-header {
+  height: calc(var(--vh, 1vh) * 100 - 64px);
 }

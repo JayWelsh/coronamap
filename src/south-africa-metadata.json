@@ -1,5 +1,16 @@
 {
     "population": 59308690,
+    "provinceNameToAbbreviation": {
+        "Eastern Cape": "EC",
+        "Free State": "FS",
+        "Gauteng": "GP",
+        "KwaZulu-Natal": "KZN",
+        "Limpopo": "LP",
+        "Mpumalanga": "MP",
+        "Northern Cape": "NC",
+        "North-West": "NW",
+        "Western Cape": "WC"
+    },
     "provinces": {
         "EC": {
             "name": "Eastern Cape",

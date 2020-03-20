@@ -650,8 +650,21 @@ pre tt:after {
 }
 
 .white-monospace {
-  color: white;
+  color: white!important;
   font-family: monospace!important;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.no-margin {
+  margin: 0!important;
+}
+
+.normal-font-weight {
+  font-weight: normal!important;
 }
 
 .our-tooltip {

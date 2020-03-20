@@ -126,7 +126,7 @@ export const OurMap = ({ groupedByProvince }) => {
                 infectionCount > 1000    ? '#fd8d3c' :
                 infectionCount > 250     ? '#feb24c' :
                 infectionCount > 50      ? '#fed976' :
-                infectionCount > 1       ? '#ffffcc' :
+                infectionCount >= 1       ? '#ffffcc' :
                 'darkgreen';
     }
 

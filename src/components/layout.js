@@ -27,6 +27,17 @@ const Layout = ({ children, totalCases }) => {
   const theme = createMuiTheme({
     palette: {
       type: 'dark',
+      primary: {
+        50: '#FFFFFF',
+        100: '#2C2C2C',
+        200: '#242424',
+        300: '#0F0F0F',
+        500: '#000000',
+        A100: '#000000',
+        A200: '#0F0F0F',
+        A400: '#242424',
+        A700: '#2C2C2C'
+      },
     },
   })
 

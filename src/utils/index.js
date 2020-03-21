@@ -5,3 +5,12 @@ export const isConsideredMobile = () => {
     }
     return check;
 };
+
+export const arrayIntoChunks = (array = [], chunkLength = 1) =>{
+    if(chunkLength === 1) {
+        return array;
+    }
+    return array.map((item, index) => {
+        return index % chunkLength === 0 ? array.slice(index, index + chunkLength) : null; 
+    }).filter(item => item);
+} 

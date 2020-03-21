@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Map, TileLayer, Tooltip, CircleMarker, GeoJSON } from 'react-leaflet'
 import Control from './LeafletControl';
-import Fab from '@material-ui/core/Fab';
-import DarkModeIcon from '@material-ui/icons/Brightness3';
-import LightModeIcon from '@material-ui/icons/Brightness5';
-import BubbleChartIcon from '@material-ui/icons/BubbleChart';
-import BorderChartIcon from '@material-ui/icons/GridOn';
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
@@ -16,7 +11,7 @@ import { isConsideredMobile } from "../utils";
 
 const MapBackgroundProvider = styled.div`
     & > .leaflet-container {
-        background-color: ${props => props.darkMode ? "rgb(38, 38, 38)!important" : "#d5e8eb!important"};
+        background-color: ${props => props.useLightMode ? "#d5e8eb!important" : "rgb(38, 38, 38)!important"};
     }
 `
 
@@ -41,11 +36,20 @@ let options = {
     zoomSnap: 0.5,
 }
 
-export const OurMap = ({ groupedByProvince }) => {
+export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", prefersLightMode = false }) => {
 
     let [markers, setMarkers] = useState(false);
-    let [darkMode, setDarkMode] = useState(true);
-    let [bubbleChart, setBubbleChart] = useState(true);
+    let [useLightMode, setUseLightMode] = useState(prefersLightMode);
+    let [useMapType, setUseMapType] = useState(mapType);
+
+    useEffect(() => {
+        if(prefersLightMode !== useLightMode){
+            setUseLightMode(prefersLightMode);
+        }
+        if(mapType !== useMapType){
+            setUseMapType(mapType);
+        }
+    }, [prefersLightMode, mapType, useLightMode, useMapType])
     
     useEffect(() => {
         let markers = [];
@@ -55,18 +59,22 @@ export const OurMap = ({ groupedByProvince }) => {
         let reachMaxRadiusAt = 61;
         let { provinces } = SouthAfrica;
         for (let province of Object.keys(provinces)) {
-            if (groupedByProvince[province]) {
-            let provinceCaseCount = groupedByProvince[province].length;
+            if (confirmedCasesGroupedByProvince[province]) {
+            let provinceCaseCount = confirmedCasesGroupedByProvince[province].length;
             let setRadius = minRadius + (((provinceCaseCount * 100 / reachMaxRadiusAt) / 100) * radiusDelta);
             markers.push({
                 position: provinces[province].position,
                 color: "#ff0081",
                 radius: setRadius,
                 tooltipText: (
-                    <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                        <sup>{provinces[province].name}</sup><br />
-                        <b>{provinceCaseCount}</b> {provinceCaseCount > 1 ? "Cases" : "Case"}
-                    </Typography>
+                    <div>
+                        <h4 className="white-monospace line-height-1 normal-font-weight no-wrap our-tooltip-title-text">
+                            {provinces[province].name}
+                        </h4>
+                        <h3 className="white-monospace line-height-1 no-margin normal-font-weight">
+                            <b>{provinceCaseCount}</b> {provinceCaseCount > 1 ? "Cases" : "Case"}
+                        </h3>
+                    </div>
                 )
             })
             } else {
@@ -75,22 +83,26 @@ export const OurMap = ({ groupedByProvince }) => {
                 color: "green",
                 radius: minRadius,
                 tooltipText: (
-                    <h3 class="white-monospace line-height-1 no-margin normal-font-weight">
-                        <sup>{provinces[province].name}</sup><br />
-                        <b>0</b> Cases
-                    </h3>
+                    <div>
+                        <h4 className="white-monospace line-height-1 normal-font-weight no-wrap our-tooltip-title-text">
+                            {provinces[province].name}
+                        </h4>
+                        <h3 className="white-monospace line-height-1 no-margin normal-font-weight">
+                            <b>0</b> Cases
+                        </h3>
+                    </div>
                 )
             })
             }
         }
         setMarkers(markers);
-    }, [groupedByProvince]);
+    }, [confirmedCasesGroupedByProvince]);
 
     const style = (feature) => {
         return {
             weight: 2,
             opacity: 1,
-            color: darkMode ? 'white' : 'black',
+            color: useLightMode ? 'black' : 'white',
             dashArray: '3',
             fillOpacity: 0.9,
             fillColor: getColor(feature.properties.NAME_1)
@@ -101,12 +113,21 @@ export const OurMap = ({ groupedByProvince }) => {
         if (feature.properties && feature.properties.NAME_1) {
             let provinceCaseCount = 0;
             let provinceName = feature.properties.NAME_1;
-            if(groupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]]) {
-                provinceCaseCount = groupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]].length;
+            if(confirmedCasesGroupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]]) {
+                provinceCaseCount = confirmedCasesGroupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]].length;
             }else{
                 provinceCaseCount = 0;
             }
-            layer.bindTooltip(`<h3 class="white-monospace line-height-1 no-margin normal-font-weight"><sup>${feature.properties.NAME_1}</sup><br/><b>${provinceCaseCount}</b>${(provinceCaseCount > 1 || provinceCaseCount === 0) ? " Cases" : " Case"}</h3>`, {
+            layer.bindTooltip(`
+                <div>
+                    <h4 class="white-monospace line-height-1 normal-font-weight no-wrap our-tooltip-title-text">
+                        ${feature.properties.NAME_1}
+                    </h4>
+                    <h3 class="white-monospace line-height-1 no-margin normal-font-weight">
+                        <b>${provinceCaseCount}</b>${(provinceCaseCount > 1 || provinceCaseCount === 0) ? " Cases" : " Case"}
+                    </h3>
+                </div>
+                `, {
                 sticky: true,
                 className: "our-tooltip white-monospace",
                 direction: "auto",
@@ -116,8 +137,8 @@ export const OurMap = ({ groupedByProvince }) => {
     
     const getColor = (provinceName) => {
         let infectionCount = 0;
-        if(groupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]]) {
-            infectionCount = groupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]].length;
+        if(confirmedCasesGroupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]]) {
+            infectionCount = confirmedCasesGroupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]].length;
         }
         return  infectionCount > 250000  ? '#800026' :
                 infectionCount > 50000   ? '#bd0026' :
@@ -126,25 +147,15 @@ export const OurMap = ({ groupedByProvince }) => {
                 infectionCount > 1000    ? '#fd8d3c' :
                 infectionCount > 250     ? '#feb24c' :
                 infectionCount > 50      ? '#fed976' :
-                infectionCount >= 1       ? '#ffffcc' :
+                infectionCount >= 1      ? '#ffffcc' :
                 'darkgreen';
     }
 
     if (typeof window !== 'undefined') {
         return (
-            <MapBackgroundProvider darkMode={darkMode}>
+            <MapBackgroundProvider useLightMode={useLightMode}>
                 <Map {...options}>
-                    <Control position="topright">
-                        <div className="flex-column">
-                            <Fab style={{marginBottom: '15px'}} onClick={() => setDarkMode(!darkMode)} aria-label="add">
-                                {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
-                            </Fab>
-                            <Fab onClick={() => setBubbleChart(!bubbleChart)} aria-label="add">
-                                {bubbleChart ? <BorderChartIcon /> : <BubbleChartIcon />}
-                            </Fab>
-                        </div>
-                    </Control>
-                    {!bubbleChart && 
+                    {useMapType === "choropleth" && 
                         <Control position="bottomright">
                             <Paper style={{padding: '10px'}}>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
@@ -178,12 +189,12 @@ export const OurMap = ({ groupedByProvince }) => {
                         </Control>
                     }
                     <TileLayer
-                        attribution='Data by <a href="https://dsfsi.github.io/">dsfsi</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                        url={darkMode ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'}
+                        attribution='Data by <a href="https://github.com/dsfsi/covid19za">dsfsi</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                        url={useLightMode ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'}
                     />
-                    {!bubbleChart && <GeoJSON style={style} data={geojson} onEachFeature={onEachFeature}/>}
+                    {useMapType === "choropleth" && <GeoJSON style={style} data={geojson} onEachFeature={onEachFeature}/>}
                     {
-                        bubbleChart && markers && markers.map(marker => {
+                        useMapType === "bubble" && markers && markers.map(marker => {
                             return (
                                 <CircleMarker key={marker.position} center={marker.position} color={marker.color} radius={marker.radius}>
                                     <Tooltip sticky className={"our-tooltip"}>{marker.tooltipText}</Tooltip>

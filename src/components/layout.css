@@ -659,6 +659,15 @@ pre tt:after {
   flex-direction: column;
 }
 
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.no-wrap {
+  white-space: nowrap;
+}
+
 .no-margin {
   margin: 0!important;
 }
@@ -674,6 +683,14 @@ pre tt:after {
 
 .our-tooltip:before {
   display:none;
+}
+
+.our-tooltip-title-text {
+  margin-bottom: 5px;
+}
+
+.center-text {
+  text-align: center;
 }
 
 .line-height-1 {
@@ -692,4 +709,19 @@ pre tt:after {
 
 .fullheight-minus-header {
   height: calc(var(--vh, 1vh) * 100 - 64px);
+}
+
+.vertical-align {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.opacity-hover {
+  opacity: 0.5;
+  transition: opacity .2s ease-in-out;
+}
+
+.opacity-hover:hover {
+  opacity: 1;
 }

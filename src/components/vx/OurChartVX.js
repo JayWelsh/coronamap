@@ -55,7 +55,7 @@ class OurChartVX extends React.Component {
     }
 
     render() {
-        const { data, decimals = 2, parentWidth, parentHeight, margin, tooltipLeft, tooltipTop, tooltipData, hideTooltip, isConsideredMobile, chartValueLabel, enableCurveStepAfter} = this.props;
+        const { data, areaFillKey, isGoodChart = false, decimals = 2, parentWidth, parentHeight, margin, tooltipLeft, tooltipTop, tooltipData, hideTooltip, isConsideredMobile, chartValueLabel, enableCurveStepAfter} = this.props;
         const {shiftTooltipLeft, shiftTooltipRight} = this.state;
 
         const width = parentWidth - margin.left - margin.right;
@@ -71,6 +71,12 @@ class OurChartVX extends React.Component {
         } else if (shiftTooltipRight) {
             tooltipDateTranslate = 'translateX(0%)';
         }
+
+        let toGradient = 'red';
+        if(isGoodChart) {
+            toGradient = 'green';
+        }
+        console.log({toGradient});
 
     
         if (data.length > 0) {
@@ -143,7 +149,7 @@ class OurChartVX extends React.Component {
                             numTicks={numTicks}
                             className={"monospace"}
                         />
-                        <LinearGradient id='area-fill' from="#424242" to="#0d0b14" fromOpacity={1} toOpacity={0} />
+                        <LinearGradient id={'area-fill-' + areaFillKey} from="#424242" to={isGoodChart ? "green" : "red"} fromOpacity={1} toOpacity={0} />
                         <PatternLines
                             id="dLines"
                             height={6}
@@ -161,7 +167,7 @@ class OurChartVX extends React.Component {
                             x={d => xScale(xData(d))}
                             curve={enableCurveStepAfter ? curveStepAfter : curveLinear}
                             y={d => yScale(y(d))}
-                            fill="url(#area-fill)"
+                            fill={`url(#area-fill-${areaFillKey})`}
                             stroke="transparent" />
                         <AreaClosed
                             stroke="transparent"

@@ -83,7 +83,7 @@ class OurChartContainerVX extends React.Component {
         }
     }
     render() {
-        const { classes, margin, isChangeNeutral = false, primaryValueSubtitle = false, chartTitle, chartSubtitle, isConsideredMobile, chartData, parentWidth, parentHeight, isChartLoading, chartValueLabel, enableCurveStepAfter = false, decimals = 2, isUpGood = false } = this.props;
+        const { classes, margin, areaFillKey, isGoodChart = false, isChangeNeutral = false, primaryValueSubtitle = false, chartTitle, chartSubtitle, isConsideredMobile, chartData, parentWidth, parentHeight, isChartLoading, chartValueLabel, enableCurveStepAfter = false, decimals = 2, isUpGood = false } = this.props;
         let currentValue = 0;
         let diffValue = 0;
         let hasIncreased = true;
@@ -149,7 +149,7 @@ class OurChartContainerVX extends React.Component {
                             </div>
                         </div>
                         <div className={classes.innerContainer}>
-                            <OurChartVX decimals={decimals} enableCurveStepAfter={enableCurveStepAfter} isConsideredMobile={isConsideredMobile} chartValueLabel={chartValueLabel} margin={useMargin} data={values} />
+                            <OurChartVX areaFillKey={areaFillKey} isGoodChart={isGoodChart} decimals={decimals} enableCurveStepAfter={enableCurveStepAfter} isConsideredMobile={isConsideredMobile} chartValueLabel={chartValueLabel} margin={useMargin} data={values} />
                         </div>
                     </div>
                 </div>

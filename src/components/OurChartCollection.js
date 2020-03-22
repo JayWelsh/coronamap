@@ -90,7 +90,7 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             <h1 className="white-monospace center-text" style={{paddingTop: '25px'}}>Charts</h1>
             <div style={{...graphPadding}}>
                 {cumulativeCasesLineChartData && 
-                    <OurChartContainerVX isUpGood={false} enableCurveStepAfter={false} chartTitle={"Cumulative Cases"} chartSubtitle={"South Africa"} chartData={cumulativeCasesLineChartData} chartValueLabel={"Cases"} />
+                    <OurChartContainerVX areaFillKey={"cases-cumulative-linechart"} isUpGood={false} enableCurveStepAfter={false} chartTitle={"Cumulative Cases"} chartSubtitle={"South Africa"} chartData={cumulativeCasesLineChartData} chartValueLabel={"Cases"} />
                 }
             </div>
             <div style={{height: '600px'}}>
@@ -105,8 +105,8 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
                 }
             </div>
             <div style={{...graphPadding, marginTop: '115px'}}>
-                {cumulativeCasesLineChartData && 
-                    <OurChartContainerVX isChangeNeutral={true} enableCurveStepAfter={false} chartTitle={"New Cases"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New"} />
+                {newCasesLineChartData && 
+                    <OurChartContainerVX areaFillKey={"cases-new-linechart"} isChangeNeutral={true} enableCurveStepAfter={false} chartTitle={"New Cases"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New"} />
                 }
             </div>
             <div style={{height: '600px'}}>
@@ -122,10 +122,10 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             </div>
             <div style={{...graphPadding, marginTop: '115px'}}>
                 {testingCasesTimeseries && 
-                    <OurChartContainerVX isUpGood={true} decimals={0} enableCurveStepAfter={false} chartTitle={"Cumulative Testing"} chartSubtitle={"South Africa"} chartData={testingCasesTimeseries} chartValueLabel={"Tests"} />
+                    <OurChartContainerVX areaFillKey={"testing-cumulative-linechart"} isGoodChart={true} isUpGood={true} decimals={0} enableCurveStepAfter={false} chartTitle={"Cumulative Testing"} chartSubtitle={"South Africa"} chartData={testingCasesTimeseries} chartValueLabel={"Tests"} />
                 }
             </div>
-            <div style={{height: '150px', position: 'relative'}}>
+            <div style={{height: '50px', position: 'relative'}}>
             </div>
         </Fragment>
     )

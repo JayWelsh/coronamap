@@ -1,3 +1,7 @@
+import BigNumber from 'bignumber.js';
+
+BigNumber.config({ EXPONENTIAL_AT: 100 });
+
 export const isConsideredMobile = () => {
     var check = false;
     if (typeof window !== 'undefined') {
@@ -14,3 +18,24 @@ export const arrayIntoChunks = (array = [], chunkLength = 1) =>{
         return index % chunkLength === 0 ? array.slice(index, index + chunkLength) : null; 
     }).filter(item => item);
 } 
+
+export const valueFormat = (value, decimals = 2) => {
+	//Rounds down - I think it is better to under represent this value than to over represent it
+	return BigNumber(value).toFixed(decimals, 1).toString();
+}
+
+export const valueFormatDisplay = (value, decimals = 2, label = false, prepend = false, adaptiveDecimals = false) => {
+    if(adaptiveDecimals) {
+        let detectAdaptiveValue = value < 0 ? value * -1 : value * 1;
+        if((detectAdaptiveValue < 0.1) && (decimals >= 2)) {
+            decimals = 3;
+        }
+    }
+	if(label) {
+        if(prepend){
+            return `${label}${'\u00A0'}` + new BigNumber(valueFormat(value, decimals)).toFormat(decimals);
+        }
+		return new BigNumber(valueFormat(value, decimals)).toFormat(decimals) + `${'\u00A0'}${label}`;
+	}
+	return new BigNumber(valueFormat(value, decimals)).toFormat(decimals);
+}

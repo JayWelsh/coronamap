@@ -659,6 +659,10 @@ pre tt:after {
   font-family: monospace!important;
 }
 
+.monospace {
+  font-family: monospace!important;
+}
+
 .flex-column {
   display: flex;
   flex-direction: column;

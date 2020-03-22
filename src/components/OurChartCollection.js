@@ -1,18 +1,24 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { ParentSize } from '@vx/responsive';
+import moment from "moment";
 
 import SouthAfrica from "../south-africa-metadata.json";
-import OurHorizontalBarChart from "../components/OurHorizontalBarChart";
+import OurHorizontalBarChartVX from "./vx/OurHorizontalBarChartVX";
+import OurChartContainerVX from "./vx/OurChartContainerVX";
+import {isConsideredMobile} from "../utils";
 
 const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHeaderData = []}) => {
     const [provinceNewCasesHorizontalChartData, setProvinceNewCasesHorizontalChartData] = useState(false);
     const [provinceCumulativeCasesHorizontalChartData, setProvinceCumulativeCasesHorizontalChartData] = useState(false);
+    const [newCasesLineChartData, setNewCasesLineChartData] = useState(false);
+    const [cumulativeCasesLineChartData, setCumulativeCasesLineChartData] = useState(false);
     useEffect(() => {
         let indexOfProvince = confirmedCasesHeaderData.indexOf("province");
         let dateToCollection = {};
         let provincesInData = [];
         let provinceCumulativeCount = {};
         let datedProvinceCumulativeCounts = {};
+        let dayBeforeDataSetStart = moment("20200304")
         for(let dateOfGroup of Object.keys(confirmedCasesGroupedByDate)) {
             for(let confirmedCase of confirmedCasesGroupedByDate[dateOfGroup]) {
                 let province = SouthAfrica.provinces[confirmedCase[indexOfProvince]].name;
@@ -37,6 +43,14 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             }
             datedProvinceCumulativeCounts[dateOfGroup] = {...provinceCumulativeCount};
         }
+        let cumulativeCasesLineChartData = [{xAxisValue: dayBeforeDataSetStart, yAxisValue: 0}];
+        for(let dateOfGroup of Object.keys(datedProvinceCumulativeCounts)) {
+            let dateTotal = 0;
+            for(let [key, value] of Object.entries(datedProvinceCumulativeCounts[dateOfGroup])) {
+                dateTotal += value;
+            }
+            cumulativeCasesLineChartData.push({xAxisValue: moment(dateOfGroup), yAxisValue: dateTotal});
+        }
         let provinceNewCasesHorizontalChartData = [];
         let provinceCumulativeCasesHorizontalChartData = [];
         for(let dateOfProvinceCases of Object.keys(dateToCollection)){
@@ -55,28 +69,51 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             provinceNewCasesHorizontalChartData.push({date: dateOfProvinceCases, ...provinceNewCaseCountsAsStrings});
             provinceCumulativeCasesHorizontalChartData.push({date: dateOfProvinceCases, ...datedProvinceCumulativeCounts[dateOfProvinceCases]})
         }
+        let newCasesLineChartData = [{xAxisValue: dayBeforeDataSetStart, yAxisValue: 0}];
+        for(let dateOfGroup of Object.keys(dateToCollection)) {
+            let dateTotal = 0;
+            for(let [key, value] of Object.entries(dateToCollection[dateOfGroup])) {
+                dateTotal += value;
+            }
+            newCasesLineChartData.push({xAxisValue: moment(dateOfGroup), yAxisValue: dateTotal});
+        }
         setProvinceNewCasesHorizontalChartData(provinceNewCasesHorizontalChartData.reverse());
         setProvinceCumulativeCasesHorizontalChartData(provinceCumulativeCasesHorizontalChartData.reverse());
+        setCumulativeCasesLineChartData(cumulativeCasesLineChartData);
+        setNewCasesLineChartData(newCasesLineChartData);
     }, [confirmedCasesGroupedByDate, confirmedCasesHeaderData])
+
+    let graphPadding = isConsideredMobile() ? { paddingLeft: '10px', paddingRight: '10px', paddingTop: '25px', paddingBottom: '25px' } : { paddingLeft: '50px', paddingRight: '50px', paddingTop: '25px', paddingBottom: '25px'  }
     return (
         <Fragment>
+            <h1 class="white-monospace center-text" style={{paddingTop: '25px'}}>Charts</h1>
+            <div style={{...graphPadding}}>
+                {cumulativeCasesLineChartData && 
+                    <OurChartContainerVX enableCurveStepAfter={false} chartTitle={"Cumulative Coronavirus Infections"} chartSubtitle={"South Africa"} chartData={cumulativeCasesLineChartData} chartValueLabel={"Cases"} />
+                }
+            </div>
             <div style={{height: '600px'}}>
                 {(provinceCumulativeCasesHorizontalChartData && provinceCumulativeCasesHorizontalChartData.length > 0) &&
                     <ParentSize className="graph-container">
                         {({ width: w, height: h }) => {
                             return (
-                                <OurHorizontalBarChart chartTitle={"Cumulative Cases"} singularLabel={"Cumulative Case"} pluralLabel={"Cumulative Cases"} colorRange={["#4DF21F", "#00F3FF", "#9999FF", "#D82DB9", "#AA1B1B", "#F4E3E3", "#00A57C", "#44FFD1", "#E8E16D"]} data={provinceCumulativeCasesHorizontalChartData} width={w} height={h}/>
+                                <OurHorizontalBarChartVX chartTitle={"Cumulative Cases"} singularLabel={"Cumulative Case"} pluralLabel={"Cumulative Cases"} colorRange={["#4DF21F", "#00F3FF", "#9999FF", "#D82DB9", "#AA1B1B", "#F4E3E3", "#00A57C", "#44FFD1", "#E8E16D"]} data={provinceCumulativeCasesHorizontalChartData} width={w} height={h}/>
                             )
                         }}
                     </ParentSize>
                 }
             </div>
-            <div style={{height: '600px', marginTop: '75px'}}>
+            <div style={{...graphPadding, marginTop: '115px'}}>
+                {cumulativeCasesLineChartData && 
+                    <OurChartContainerVX enableCurveStepAfter={false} chartTitle={"New Coronavirus Infections"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New Cases"} />
+                }
+            </div>
+            <div style={{height: '600px'}}>
                 {(provinceNewCasesHorizontalChartData && provinceNewCasesHorizontalChartData.length > 0) &&
                     <ParentSize className="graph-container">
                         {({ width: w, height: h }) => {
                             return (
-                                <OurHorizontalBarChart chartTitle={"New Cases"} singularLabel={"New Case"} pluralLabel={"New Cases"} colorRange={["#4DF21F", "#00F3FF", "#9999FF", "#D82DB9", "#AA1B1B", "#F4E3E3", "#00A57C", "#44FFD1", "#E8E16D"]} data={provinceNewCasesHorizontalChartData} width={w} height={h}/>
+                                <OurHorizontalBarChartVX chartTitle={"New Cases"} singularLabel={"New Case"} pluralLabel={"New Cases"} colorRange={["#4DF21F", "#00F3FF", "#9999FF", "#D82DB9", "#AA1B1B", "#F4E3E3", "#00A57C", "#44FFD1", "#E8E16D"]} data={provinceNewCasesHorizontalChartData} width={w} height={h}/>
                             )
                         }}
                     </ParentSize>

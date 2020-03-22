@@ -89,7 +89,7 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             <h1 class="white-monospace center-text" style={{paddingTop: '25px'}}>Charts</h1>
             <div style={{...graphPadding}}>
                 {cumulativeCasesLineChartData && 
-                    <OurChartContainerVX enableCurveStepAfter={false} chartTitle={"Cumulative Coronavirus Infections"} chartSubtitle={"South Africa"} chartData={cumulativeCasesLineChartData} chartValueLabel={"Cases"} />
+                    <OurChartContainerVX enableCurveStepAfter={false} chartTitle={"Cumulative Cases"} chartSubtitle={"South Africa"} chartData={cumulativeCasesLineChartData} chartValueLabel={"Cases"} />
                 }
             </div>
             <div style={{height: '600px'}}>
@@ -105,7 +105,7 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             </div>
             <div style={{...graphPadding, marginTop: '115px'}}>
                 {cumulativeCasesLineChartData && 
-                    <OurChartContainerVX enableCurveStepAfter={false} chartTitle={"New Coronavirus Infections"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New Cases"} />
+                    <OurChartContainerVX enableCurveStepAfter={false} chartTitle={"New Cases"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New"} />
                 }
             </div>
             <div style={{height: '600px'}}>

@@ -38,22 +38,49 @@ const IndexPage = () => {
   let [confirmedCasesGroupedByProvince, setConfirmedCasesGroupedByProvince] = useState(false);
   let [confirmedCasesGroupedByDate, setConfirmedCasesGroupedByDate] = useState(false);
   let [prefersLightMode, setPrefersLightMode] = useState((typeof window !== 'undefined' && window.localStorage.getItem("prefersLightMode") === "true") ? true : false);
-  let [mapType, setMapType] = useState("bubble");
-  let [nextMapType, setNextMapType] = useState("choropleth");
-  let [dataType, setDataType] = useState(null);
-  let [nextDataType, setNextDataType] = useState("charts");
+  let [mapType, setMapType] = useState((typeof window !== 'undefined' && window.localStorage.getItem("mapType")) ? window.localStorage.getItem("mapType") : "bubble");
+  let [nextMapType, setNextMapType] = useState(false);
+  let [dataType, setDataType] = useState((typeof window !== 'undefined' && window.localStorage.getItem("dataType")) ? window.localStorage.getItem("dataType") : "map");
+  let [nextDataType, setNextDataType] = useState(false);
   let [confirmedCasesHeaderData, setConfirmedCasesHeaderData] = useState(false);
+  let [hospitalData, setHospitalData] = useState(false);
 
   let mobile = isConsideredMobile();
 
+  const getNextMapType = (mapType) => {
+    switch(mapType) {
+      case "bubble":
+        return "choropleth";
+      case "choropleth":
+        return "bubble";
+      default:
+        return "choropleth";
+    }
+  }
+
+  const getNextDataType = (dataType) => {
+    switch(dataType) {
+      case "map":
+        return "charts";
+      case "charts":
+        return "map";
+      default:
+        return "map";
+    }
+  }
+
   const switchToNextMapType = () => {
     setMapType(nextMapType);
-    setNextMapType(mapType);
+    let newNextMapType = getNextMapType(nextMapType);
+    setNextMapType(newNextMapType);
+    window.localStorage.setItem("mapType", nextMapType);
   }
 
   const switchToNextDataType = () => {
     setDataType(nextDataType);
-    setNextDataType(dataType);
+    let newNextDataType = getNextDataType(nextDataType);
+    setNextDataType(newNextDataType);
+    window.localStorage.setItem("dataType", nextDataType);
   }
 
   const savePrefersLightMode = (prefersLightMode) => {
@@ -64,10 +91,12 @@ const IndexPage = () => {
   useEffect(() => {
     axios.all([
       axios.get(`https://raw.githubusercontent.com/dsfsi/covid19za/master/data/covid19za_timeline_confirmed.csv`),
+      // axios.get(`https://raw.githubusercontent.com/dsfsi/covid19za/master/data/covid19za_timeline_testing.csv`),
       // axios.get(`https://raw.githubusercontent.com/dsfsi/covid19za/master/data/health_system_za_public_hospitals.csv`)
     ]).then(res => {
       let { data: confirmedCasesData } = res[0];
-      // let { data: hospitalLocationData } = res[1];
+      // let { data: testingData } = res[1];
+      // let { data: hospitalLocationData } = res[2];
       
       let parsedConfirmedCasesInstance = Papa.parse(confirmedCasesData);
       let parsedConfirmedCasesData = parsedConfirmedCasesInstance.data;
@@ -103,11 +132,36 @@ const IndexPage = () => {
         }
       }
 
+      // let hospitalData = [];
+      // let hospitalDataIndexOfName = parsedHospitalLocationData[0].indexOf("Name");
+      // let hospitalDataIndexOfLongitude = parsedHospitalLocationData[0].indexOf("Long");
+      // let hospitalDataIndexOfLatitude = parsedHospitalLocationData[0].indexOf("Lat");
+      // for(let hospitalEntry of parsedHospitalLocationData) {
+      //   if(
+      //       hospitalEntry[hospitalDataIndexOfName] &&
+      //       hospitalEntry[hospitalDataIndexOfName] !== "Name" &&
+      //       hospitalEntry[hospitalDataIndexOfLongitude] &&
+      //       hospitalEntry[hospitalDataIndexOfLatitude] &&
+      //       !isNaN(hospitalEntry[hospitalDataIndexOfLatitude] * 1) &&
+      //       !isNaN(hospitalEntry[hospitalDataIndexOfLongitude] * 1)
+      //     ) {
+      //       hospitalData.push({name: hospitalEntry[hospitalDataIndexOfName], position: [hospitalEntry[hospitalDataIndexOfLatitude] * 1, hospitalEntry[hospitalDataIndexOfLongitude] * 1]})
+      //     }
+      // }
+
       setConfirmedCasesHeaderData(confirmedCasesHeaderRow);
       setConfirmedCasesGroupedByProvince(confirmedCasesGroupedByProvince);
       setConfirmedCasesGroupedByDate(confirmedCasesGroupedByDate);
+      // setHospitalData(hospitalData);
       setTotalCases(currentTotalCases);
-      setDataType('map');
+      
+      let dataType = (typeof window !== 'undefined' && window.localStorage.getItem("dataType")) ? window.localStorage.getItem("dataType") : "map";
+      let nextDataType = getNextDataType(dataType);
+      setNextDataType(nextDataType);
+
+      let mapType = (typeof window !== 'undefined' && window.localStorage.getItem("mapType")) ? window.localStorage.getItem("mapType") : "bubble";
+      let nextMapType = getNextMapType(mapType);
+      setNextMapType(nextMapType)
     })
   }, [])
 
@@ -143,7 +197,7 @@ const IndexPage = () => {
           </div>
         </SiteControlTopRightContainer>
       }
-      {dataType === "map" &&
+      {dataType === "map" && totalCases &&
         <SiteControlBottomLeftContainer mobile={mobile} isMapPage={dataType === "map" ? true : false}>
           <a target="_blank" rel="noopener noreferrer" href="https://github.com/JayWelsh/coronamap">
               <Fab aria-label="add">
@@ -153,7 +207,7 @@ const IndexPage = () => {
         </SiteControlBottomLeftContainer>
       }
       {(confirmedCasesGroupedByDate && confirmedCasesHeaderData && dataType === "charts") && <OurChartCollection confirmedCasesHeaderData={confirmedCasesHeaderData} confirmedCasesGroupedByDate={confirmedCasesGroupedByDate}/>}
-      {(confirmedCasesGroupedByProvince && dataType === "map") && <OurMap mapType={mapType} prefersLightMode={prefersLightMode} confirmedCasesGroupedByProvince={confirmedCasesGroupedByProvince}/>}
+      {(confirmedCasesGroupedByProvince && dataType === "map") && <OurMap mapType={mapType} prefersLightMode={prefersLightMode} hospitalData={hospitalData} confirmedCasesGroupedByProvince={confirmedCasesGroupedByProvince}/>}
     </Layout>
   )
 }

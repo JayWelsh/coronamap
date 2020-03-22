@@ -36,9 +36,10 @@ let options = {
     zoomSnap: 0.5,
 }
 
-export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", prefersLightMode = false }) => {
+export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", prefersLightMode = false, hospitalData }) => {
 
     let [markers, setMarkers] = useState(false);
+    let [hospitalMarkers, setHospitalMarkers] = useState(false);
     let [useLightMode, setUseLightMode] = useState(prefersLightMode);
     let [useMapType, setUseMapType] = useState(mapType);
 
@@ -53,11 +54,16 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
     
     useEffect(() => {
         let markers = [];
-        let maxRadius = isConsideredMobile() ? 20 : 50;
+        let maxRadius = isConsideredMobile() ? 30 : 80;
         let minRadius = isConsideredMobile() ? 10 : 15;
         let radiusDelta = maxRadius - minRadius;
-        let reachMaxRadiusAt = 61;
+        let reachMaxRadiusAt = 0;
         let { provinces } = SouthAfrica;
+        for(let provinceGroup of Object.keys(confirmedCasesGroupedByProvince)) {
+            if(confirmedCasesGroupedByProvince[provinceGroup].length > reachMaxRadiusAt) {
+                reachMaxRadiusAt = confirmedCasesGroupedByProvince[provinceGroup].length;
+            }
+        }
         for (let province of Object.keys(provinces)) {
             if (confirmedCasesGroupedByProvince[province]) {
             let provinceCaseCount = confirmedCasesGroupedByProvince[province].length;
@@ -96,6 +102,22 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
             }
         }
         setMarkers(markers);
+        // let hospitalMarkers = [];
+        // for(let hospital of hospitalData) {
+        //     hospitalMarkers.push({
+        //         position: hospital.position,
+        //         color: "green",
+        //         radius: 5,
+        //         tooltipText: (
+        //             <div>
+        //                 <h4 className="white-monospace line-height-1 normal-font-weight no-wrap our-tooltip-title-text">
+        //                     {hospital.name}
+        //                 </h4>
+        //             </div>
+        //         )
+        //     })
+        // }
+        // setHospitalMarkers(hospitalMarkers);
     }, [confirmedCasesGroupedByProvince]);
 
     const style = (feature) => {
@@ -155,6 +177,11 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
         return (
             <MapBackgroundProvider useLightMode={useLightMode}>
                 <Map {...options}>
+                    <Control position="bottomright">
+                        <Typography className={`${useLightMode ? "black-monospace" : "white-monospace"} line-height-1`} variant="caption">
+                            Touch map artifacts to interact
+                        </Typography>
+                    </Control>
                     {useMapType === "choropleth" && 
                         <Control position="bottomright">
                             <Paper style={{padding: '10px'}}>
@@ -188,6 +215,18 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
                             </Paper>
                         </Control>
                     }
+                    {useMapType === "bubble" && 
+                        <Control position="bottomright">
+                            <Paper style={{padding: '10px'}}>
+                                <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
+                                    <LegendColorSquare color={'#ff0081'}/>Cases
+                                </Typography>
+                                <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
+                                    <LegendColorSquare color={'green'}/>No Cases
+                                </Typography>
+                            </Paper>
+                        </Control>
+                    }
                     <TileLayer
                         attribution='Data by <a href="https://github.com/dsfsi/covid19za">dsfsi</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                         url={useLightMode ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png' : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'}
@@ -201,6 +240,15 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
                                 </CircleMarker>
                             )
                         })
+                    }
+                    {
+                        // useMapType === "hospital" && hospitalMarkers && hospitalMarkers.map(marker => {
+                        //     return (
+                        //         <CircleMarker key={marker.position} center={marker.position} color={marker.color} radius={marker.radius}>
+                        //             <Tooltip sticky className={"our-tooltip"}>{marker.tooltipText}</Tooltip>
+                        //         </CircleMarker>
+                        //     )
+                        // })
                     }
                 </Map>
             </MapBackgroundProvider>

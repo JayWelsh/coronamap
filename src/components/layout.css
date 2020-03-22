@@ -654,6 +654,11 @@ pre tt:after {
   font-family: monospace!important;
 }
 
+.black-monospace {
+  color: black!important;
+  font-family: monospace!important;
+}
+
 .flex-column {
   display: flex;
   flex-direction: column;

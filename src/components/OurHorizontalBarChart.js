@@ -49,8 +49,8 @@ export default withTooltip(
 
     const mobile = isConsideredMobile();
     const fragmentLegend = mobile || (typeof window !== 'undefined' && window.innerWidth < 1280);
-    const [shiftTooltipLeft, setShiftTooltipLeft] = useState(false);
     const [legendHeight, setLegendHeight] = useState(50);
+    const chartElement = useRef(false);
     const legendElement = useRef(false);
     const tooltipElement = useRef(false);
 
@@ -59,20 +59,7 @@ export default withTooltip(
         if(legendHeight !== currentLegendHeight) {
             setLegendHeight(currentLegendHeight);
         }
-    }, [width, legendHeight])
-
-    useEffect(() => {
-        if(tooltipOpen){
-            const toolTipDistanceToRightBorder =  width - (tooltipLeft + tooltipElement.current.getBoundingClientRect().width + 15);
-            if(toolTipDistanceToRightBorder > 0 && toolTipDistanceToRightBorder < 5){
-                setShiftTooltipLeft('calc(-5px)');
-            } if(toolTipDistanceToRightBorder < 0){
-                setShiftTooltipLeft(`calc(${toolTipDistanceToRightBorder}px)`);
-            }else {
-                setShiftTooltipLeft(false);
-            }
-        }
-    }, [tooltipLeft, width, tooltipOpen])
+    }, [legendHeight])
 
     const keys = Object.keys(data[0]).filter(d => d !== 'date');
     
@@ -108,17 +95,14 @@ export default withTooltip(
     const xMax = width - margin.left - margin.right;
     const yMax = (height - legendHeight) - margin.top - margin.bottom;
 
-    let tooltipTranslate = 'translateX(0%)';
-    if(shiftTooltipLeft) {
-        tooltipTranslate = `translateX(${shiftTooltipLeft})`;
-    }
-
     xScale.rangeRound([0, xMax]);
     yScale.rangeRound([yMax, 0]);
-    let tooltipAnimation = 'all .25s cubic-bezier(.42,.2,.5,1)';
+
+    let tooltipTranslate = 'translateX(-50%)translateY(calc(-50% - 20px))';
+    let tooltipAnimation = 'all .1s ease-out';
 
     return (
-      <div style={{ position: 'relative', overflow: 'hidden' }}>
+      <div ref={chartElement} style={{ position: 'relative', overflow: 'hidden' }}>
         <h3 style={{top: margin.top, position: 'relative'}} className="white-monospace center-text">
             {chartTitle}
         </h3>
@@ -151,16 +135,28 @@ export default withTooltip(
                         onMouseLeave={event => {
                           tooltipTimeout = setTimeout(() => {
                             hideTooltip();
-                          }, 300);
+                          }, 1000);
                         }}
                         onMouseMove={event => {
                           if (tooltipTimeout) clearTimeout(tooltipTimeout);
-                          const top = bar.y + margin.top;
-                          const left = bar.x + bar.width + margin.left;
+                          let tooltipHeight = tooltipElement.current ? tooltipElement.current.getBoundingClientRect().height + 20 : 0;
+                          let setTop = mobile ? bar.y + margin.top : bar.y + margin.top + (event.clientY - event.target.getBoundingClientRect().top);
+                          if((tooltipHeight - (bar.y + margin.top)) + 5 > setTop) {
+                            setTop = tooltipHeight - (bar.y + margin.top) + 5
+                          }
+                          let halfTooltipWidth = tooltipElement.current ? tooltipElement.current.getBoundingClientRect().width / 2 : 0;
+                          let setLeft = event.clientX;
+                          if(tooltipElement.current && ((event.clientX + halfTooltipWidth) >= (width - margin.right))){
+                            setLeft = width - halfTooltipWidth - margin.right;
+                          } else if(tooltipElement.current && (event.clientX - halfTooltipWidth) < margin.left){
+                            setLeft = margin.left + halfTooltipWidth;
+                          } else if(!tooltipElement.current && mobile) {
+                            setLeft = width / 2; // Put initial render in the middle to prevent initial render being off-page
+                          }
                           showTooltip({
                             tooltipData: bar,
-                            tooltipTop: top,
-                            tooltipLeft: left
+                            tooltipTop: setTop,
+                            tooltipLeft: setLeft
                           });
                         }}
                       />
@@ -237,11 +233,11 @@ export default withTooltip(
                 left={tooltipLeft}
                 style={{
                     minWidth: 60,
-                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    backgroundColor: 'rgba(0,0,0,0.75)',
                     color: 'white',
                     transition: tooltipAnimation,
                     transform: tooltipTranslate,
-                    padding:'0px'
+                    padding:'0px',
                 }}
             >
                 <div style={{padding: '0.3rem 0.5rem'}} ref={tooltipElement}>

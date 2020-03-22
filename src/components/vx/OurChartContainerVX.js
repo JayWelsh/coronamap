@@ -67,18 +67,23 @@ const styles = theme => ({
         flexDirection: 'column',
         alignItems: 'flex-end'
     },
-    vxValueIncrease: {
-        color: 'red'
-    },
-    vxValueDecrease: {
+    vxValueGoodChange: {
         color: 'limegreen'
+    },
+    vxValueBadChange: {
+        color: 'red'
     }
 });
 
 class OurChartContainerVX extends React.Component {
-
+    constructor(props) {
+        super(props);
+        this.state = {
+            hasIncreased: true,
+        }
+    }
     render() {
-        const { classes, margin, primaryValueSubtitle = false, chartTitle, chartSubtitle, isConsideredMobile, chartData, parentWidth, parentHeight, isChartLoading, chartValueLabel, enableCurveStepAfter = false } = this.props;
+        const { classes, margin, isChangeNeutral = false, primaryValueSubtitle = false, chartTitle, chartSubtitle, isConsideredMobile, chartData, parentWidth, parentHeight, isChartLoading, chartValueLabel, enableCurveStepAfter = false, decimals = 2, isUpGood = false } = this.props;
         let currentValue = 0;
         let diffValue = 0;
         let hasIncreased = true;
@@ -103,8 +108,8 @@ class OurChartContainerVX extends React.Component {
                     yAxisValue: chartData[key].yAxisValue
                 };
             })
-            let previousLatestValue = values[values.length - 2].yAxisValue;
-            currentValue = values[values.length - 1].yAxisValue;
+            let previousLatestValue = values[values.length - 2].yAxisValue * 1;
+            currentValue = values[values.length - 1].yAxisValue * 1;
             percentDiff = ((currentValue * 100) / previousLatestValue) - 100;
             diffValue = currentValue - previousLatestValue;
             hasIncreased = diffValue >= 0;
@@ -130,13 +135,13 @@ class OurChartContainerVX extends React.Component {
                             <div className={classes.rightTitles}>
                                 <div>
                                     <Typography className={classes.vxChartTitle + " monospace no-padding-bottom"} variant="h5" component="h2">
-                                        {valueFormatDisplay(currentValue, 2, chartValueLabel)}
+                                        {valueFormatDisplay(currentValue, decimals, chartValueLabel)}
                                     </Typography>
                                 </div>
                                 <div>
                                     {!primaryValueSubtitle &&
-                                        <Typography className={classes.vxChartSubtitle + " monospace no-padding-top " + (hasIncreased ? classes.vxValueIncrease : classes.vxValueDecrease)} component="p">
-                                            {hasIncreased ? ("+ " + valueFormatDisplay(percentDiff, 2, "%")) : ("- " + valueFormatDisplay(percentDiff * -1, 2, "%"))}
+                                        <Typography className={classes.vxChartSubtitle + " monospace no-padding-top " + (!isChangeNeutral && (hasIncreased && isUpGood || (!hasIncreased && !isUpGood) ? classes.vxValueGoodChange : classes.vxValueBadChange))} component="p">
+                                            {hasIncreased ? ("+ " + valueFormatDisplay(percentDiff, decimals, "%")) : ("- " + valueFormatDisplay(percentDiff * -1, decimals, "%"))}
                                         </Typography>
                                     }
                                     {primaryValueSubtitle}
@@ -144,7 +149,7 @@ class OurChartContainerVX extends React.Component {
                             </div>
                         </div>
                         <div className={classes.innerContainer}>
-                            <OurChartVX enableCurveStepAfter={enableCurveStepAfter} isConsideredMobile={isConsideredMobile} chartValueLabel={chartValueLabel} margin={useMargin} data={values} />
+                            <OurChartVX decimals={decimals} enableCurveStepAfter={enableCurveStepAfter} isConsideredMobile={isConsideredMobile} chartValueLabel={chartValueLabel} margin={useMargin} data={values} />
                         </div>
                     </div>
                 </div>

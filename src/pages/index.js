@@ -9,6 +9,7 @@ import BubbleChartIcon from '@material-ui/icons/BubbleChart';
 import BorderChartIcon from '@material-ui/icons/GridOn';
 import ChartsIcon from '@material-ui/icons/Timeline';
 import MapIcon from '@material-ui/icons/Map';
+import moment from 'moment';
 
 import Layout from "../components/layout";
 import SEO from "../components/seo";
@@ -44,6 +45,7 @@ const IndexPage = () => {
   let [nextDataType, setNextDataType] = useState(false);
   let [confirmedCasesHeaderData, setConfirmedCasesHeaderData] = useState(false);
   let [hospitalData, setHospitalData] = useState(false);
+  let [testingCasesTimeseries, setTestingCasesTimeseries] = useState(false);
 
   let mobile = isConsideredMobile();
 
@@ -91,21 +93,36 @@ const IndexPage = () => {
   useEffect(() => {
     axios.all([
       axios.get(`https://raw.githubusercontent.com/dsfsi/covid19za/master/data/covid19za_timeline_confirmed.csv`),
-      // axios.get(`https://raw.githubusercontent.com/dsfsi/covid19za/master/data/covid19za_timeline_testing.csv`),
+      axios.get(`https://raw.githubusercontent.com/dsfsi/covid19za/master/data/covid19za_timeline_testing.csv`),
       // axios.get(`https://raw.githubusercontent.com/dsfsi/covid19za/master/data/health_system_za_public_hospitals.csv`)
     ]).then(res => {
       let { data: confirmedCasesData } = res[0];
-      // let { data: testingData } = res[1];
+      let { data: testingData } = res[1];
       // let { data: hospitalLocationData } = res[2];
-      
+
+      let testingCasesInstance = Papa.parse(testingData);
+      let parsedTestingCasesData = testingCasesInstance.data;
+
+      let testingCasesIndexOfDate = parsedTestingCasesData[0].indexOf("YYYYMMDD");
+      let testingCasesIndexOfCumulativeCount = parsedTestingCasesData[0].indexOf("cumulative_tests");
+      let useTestingCasesTimeseries = [];
+      for (let i = 1; i < parsedTestingCasesData.length; i++) {
+        if (
+          parsedTestingCasesData[i][testingCasesIndexOfDate] &&
+          parsedTestingCasesData[i][testingCasesIndexOfCumulativeCount]
+        ) {
+          let date = parsedTestingCasesData[i][testingCasesIndexOfDate];
+          let cumulation = parsedTestingCasesData[i][testingCasesIndexOfCumulativeCount];
+          useTestingCasesTimeseries.push({xAxisValue: moment(date), yAxisValue: cumulation})
+        }
+      }
+
       let parsedConfirmedCasesInstance = Papa.parse(confirmedCasesData);
       let parsedConfirmedCasesData = parsedConfirmedCasesInstance.data;
-      // let parsedHospitalLocationInstance = Papa.parse(hospitalLocationData);
-      // let parsedHospitalLocationData = parsedHospitalLocationInstance.data;
 
       let confirmedCasesHeaderRow = parsedConfirmedCasesData[0];
-      let confirmedCasesIndexOfProvince = parsedConfirmedCasesData[0].indexOf("province");
-      let confirmedCasesIndexOfDate = parsedConfirmedCasesData[0].indexOf("YYYYMMDD");
+      let confirmedCasesIndexOfProvince = confirmedCasesHeaderRow.indexOf("province");
+      let confirmedCasesIndexOfDate = confirmedCasesHeaderRow.indexOf("YYYYMMDD");
       let confirmedCasesGroupedByProvince = {};
       let confirmedCasesGroupedByDate = {};
       // let confirmedCasesGroupedByAge = {};
@@ -132,6 +149,9 @@ const IndexPage = () => {
         }
       }
 
+      // let parsedHospitalLocationInstance = Papa.parse(hospitalLocationData);
+      // let parsedHospitalLocationData = parsedHospitalLocationInstance.data;
+
       // let hospitalData = [];
       // let hospitalDataIndexOfName = parsedHospitalLocationData[0].indexOf("Name");
       // let hospitalDataIndexOfLongitude = parsedHospitalLocationData[0].indexOf("Long");
@@ -152,6 +172,7 @@ const IndexPage = () => {
       setConfirmedCasesHeaderData(confirmedCasesHeaderRow);
       setConfirmedCasesGroupedByProvince(confirmedCasesGroupedByProvince);
       setConfirmedCasesGroupedByDate(confirmedCasesGroupedByDate);
+      setTestingCasesTimeseries(useTestingCasesTimeseries);
       // setHospitalData(hospitalData);
       setTotalCases(currentTotalCases);
       
@@ -206,7 +227,7 @@ const IndexPage = () => {
           </a>
         </SiteControlBottomLeftContainer>
       }
-      {(confirmedCasesGroupedByDate && confirmedCasesHeaderData && dataType === "charts") && <OurChartCollection confirmedCasesHeaderData={confirmedCasesHeaderData} confirmedCasesGroupedByDate={confirmedCasesGroupedByDate}/>}
+      {(confirmedCasesGroupedByDate && confirmedCasesHeaderData && dataType === "charts") && <OurChartCollection testingCasesTimeseries={testingCasesTimeseries} confirmedCasesHeaderData={confirmedCasesHeaderData} confirmedCasesGroupedByDate={confirmedCasesGroupedByDate}/>}
       {(confirmedCasesGroupedByProvince && dataType === "map") && <OurMap mapType={mapType} prefersLightMode={prefersLightMode} hospitalData={hospitalData} confirmedCasesGroupedByProvince={confirmedCasesGroupedByProvince}/>}
     </Layout>
   )

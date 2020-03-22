@@ -663,6 +663,11 @@ pre tt:after {
   font-family: monospace!important;
 }
 
+.display-flex-space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
 .flex-column {
   display: flex;
   flex-direction: column;

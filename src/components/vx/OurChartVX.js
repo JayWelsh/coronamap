@@ -55,12 +55,12 @@ class OurChartVX extends React.Component {
     }
 
     render() {
-        const { data, parentWidth, parentHeight, margin, tooltipLeft, tooltipTop, tooltipData, hideTooltip, isConsideredMobile, chartValueLabel, enableCurveStepAfter} = this.props;
+        const { data, decimals = 2, parentWidth, parentHeight, margin, tooltipLeft, tooltipTop, tooltipData, hideTooltip, isConsideredMobile, chartValueLabel, enableCurveStepAfter} = this.props;
         const {shiftTooltipLeft, shiftTooltipRight} = this.state;
 
         const width = parentWidth - margin.left - margin.right;
         const height = parentHeight - margin.top - margin.bottom;
-        const tooltipAnimation = 'all .25s cubic-bezier(.42,.2,.5,1)';
+        const tooltipAnimation = 'all .25s ease-out';
 
         let tooltipValueTranslate = 'translateX(0%)';
         let tooltipDateTranslate = 'translateX(-50%)';
@@ -182,7 +182,7 @@ class OurChartVX extends React.Component {
                                 stroke={"#424242"}
                             />
                             <text className={"monospace"} y={yScale(maxValue)} fill="white" dy="1.3em" dx="1em" fontSize="14">
-                                {valueFormatDisplay(maxValue , 2, chartValueLabel)}
+                                {valueFormatDisplay(maxValue , decimals, chartValueLabel)}
                             </text>
                         </g>
                         <g>
@@ -194,7 +194,7 @@ class OurChartVX extends React.Component {
                                 stroke={"#424242"}
                             />
                             <text className={"monospace"} y={yScale(minValue)} dy="-.5em" fill="white" dx="1em" fontSize="14">
-                                {valueFormatDisplay(minValue, 2, chartValueLabel)}
+                                {valueFormatDisplay(minValue, decimals, chartValueLabel)}
                             </text>
                         </g>
                         <Bar
@@ -260,7 +260,7 @@ class OurChartVX extends React.Component {
                     {tooltipData &&
                             <div>
                             <Tooltip top={setTooltipLabelTop} left={tooltipLeft + 12} style={{backgroundColor: '#272727', color: '#FFFFFF', pointerEvents: 'none', transform: tooltipValueTranslate, transition: tooltipAnimation, whiteSpace: 'pre', boxShadow: '0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)'}}>
-                                <b className={"monospace"}>{valueFormatDisplay(y(tooltipData), 2, chartValueLabel)}</b>
+                                <b className={"monospace"}>{valueFormatDisplay(y(tooltipData), decimals, chartValueLabel)}</b>
                             </Tooltip>
                             <Tooltip top={yScale(minValue)} left={tooltipLeft} style={{backgroundColor: '#272727', color: '#FFFFFF', transform: tooltipDateTranslate, pointerEvents: 'none', display: 'table', transition: tooltipAnimation, whiteSpace: 'pre', boxShadow: '0px 5px 5px -3px rgba(0,0,0,0.2), 0px 8px 10px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12)'}}>
                                 <b className={"monospace"}>{formatDateTimeTooltip(xData(tooltipData))}</b>

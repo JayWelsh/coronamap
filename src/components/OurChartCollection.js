@@ -7,11 +7,12 @@ import OurHorizontalBarChartVX from "./vx/OurHorizontalBarChartVX";
 import OurChartContainerVX from "./vx/OurChartContainerVX";
 import {isConsideredMobile} from "../utils";
 
-const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHeaderData = []}) => {
+const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHeaderData = [], testingCasesTimeseries = []}) => {
     const [provinceNewCasesHorizontalChartData, setProvinceNewCasesHorizontalChartData] = useState(false);
     const [provinceCumulativeCasesHorizontalChartData, setProvinceCumulativeCasesHorizontalChartData] = useState(false);
     const [newCasesLineChartData, setNewCasesLineChartData] = useState(false);
     const [cumulativeCasesLineChartData, setCumulativeCasesLineChartData] = useState(false);
+
     useEffect(() => {
         let indexOfProvince = confirmedCasesHeaderData.indexOf("province");
         let dateToCollection = {};
@@ -81,15 +82,15 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
         setProvinceCumulativeCasesHorizontalChartData(provinceCumulativeCasesHorizontalChartData.reverse());
         setCumulativeCasesLineChartData(cumulativeCasesLineChartData);
         setNewCasesLineChartData(newCasesLineChartData);
-    }, [confirmedCasesGroupedByDate, confirmedCasesHeaderData])
+    }, [confirmedCasesGroupedByDate, confirmedCasesHeaderData, testingCasesTimeseries])
 
     let graphPadding = isConsideredMobile() ? { paddingLeft: '10px', paddingRight: '10px', paddingTop: '25px', paddingBottom: '25px' } : { paddingLeft: '50px', paddingRight: '50px', paddingTop: '25px', paddingBottom: '25px'  }
     return (
         <Fragment>
-            <h1 class="white-monospace center-text" style={{paddingTop: '25px'}}>Charts</h1>
+            <h1 className="white-monospace center-text" style={{paddingTop: '25px'}}>Charts</h1>
             <div style={{...graphPadding}}>
                 {cumulativeCasesLineChartData && 
-                    <OurChartContainerVX enableCurveStepAfter={false} chartTitle={"Cumulative Cases"} chartSubtitle={"South Africa"} chartData={cumulativeCasesLineChartData} chartValueLabel={"Cases"} />
+                    <OurChartContainerVX isUpGood={false} enableCurveStepAfter={false} chartTitle={"Cumulative Cases"} chartSubtitle={"South Africa"} chartData={cumulativeCasesLineChartData} chartValueLabel={"Cases"} />
                 }
             </div>
             <div style={{height: '600px'}}>
@@ -105,7 +106,7 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             </div>
             <div style={{...graphPadding, marginTop: '115px'}}>
                 {cumulativeCasesLineChartData && 
-                    <OurChartContainerVX enableCurveStepAfter={false} chartTitle={"New Cases"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New"} />
+                    <OurChartContainerVX isChangeNeutral={true} enableCurveStepAfter={false} chartTitle={"New Cases"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New"} />
                 }
             </div>
             <div style={{height: '600px'}}>
@@ -117,6 +118,11 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
                             )
                         }}
                     </ParentSize>
+                }
+            </div>
+            <div style={{...graphPadding, marginTop: '115px'}}>
+                {testingCasesTimeseries && 
+                    <OurChartContainerVX isUpGood={true} decimals={0} enableCurveStepAfter={false} chartTitle={"Cumulative Testing"} chartSubtitle={"South Africa"} chartData={testingCasesTimeseries} chartValueLabel={"Tests"} />
                 }
             </div>
             <div style={{height: '150px', position: 'relative'}}>

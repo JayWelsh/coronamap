@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import OurChartVX from './OurChartVX';
-import { valueFormatDisplay } from '../../utils';
+import { valueFormatDisplay, isConsideredMobile } from '../../utils';
 import { withParentSize } from '@vx/responsive';
 
 const styles = theme => ({
@@ -80,10 +80,12 @@ class OurChartContainerVX extends React.Component {
         super(props);
         this.state = {
             hasIncreased: true,
+            useConsideredMobile: isConsideredMobile(),
         }
     }
     render() {
-        const { classes, margin, areaFillKey, isGoodChart = false, isChangeNeutral = false, primaryValueSubtitle = false, chartTitle, chartSubtitle, isConsideredMobile, chartData, parentWidth, parentHeight, isChartLoading, chartValueLabel, enableCurveStepAfter = false, decimals = 2, isUpGood = false } = this.props;
+        const { classes, margin, areaFillKey, isGoodChart = false, isChangeNeutral = false, primaryValueSubtitle = false, chartTitle, chartSubtitle, chartData, parentWidth, parentHeight, isChartLoading, chartValueLabel, enableCurveStepAfter = false, decimals = 2, isUpGood = false } = this.props;
+        let { useConsideredMobile } = this.state;
         let currentValue = 0;
         let diffValue = 0;
         let hasIncreased = true;
@@ -141,7 +143,7 @@ class OurChartContainerVX extends React.Component {
                                 <div>
                                     {!primaryValueSubtitle &&
                                         <Typography className={classes.vxChartSubtitle + " monospace no-padding-top " + (!isChangeNeutral && (hasIncreased && isUpGood || (!hasIncreased && !isUpGood) ? classes.vxValueGoodChange : classes.vxValueBadChange))} component="p">
-                                            {hasIncreased ? ("+ " + valueFormatDisplay(percentDiff, decimals, "%")) : ("- " + valueFormatDisplay(percentDiff * -1, decimals, "%"))}
+                                            {hasIncreased ? ("+ " + valueFormatDisplay(percentDiff, 2, "%")) : ("- " + valueFormatDisplay(percentDiff * -1, 2, "%"))}
                                         </Typography>
                                     }
                                     {primaryValueSubtitle}
@@ -149,7 +151,7 @@ class OurChartContainerVX extends React.Component {
                             </div>
                         </div>
                         <div className={classes.innerContainer}>
-                            <OurChartVX areaFillKey={areaFillKey} isGoodChart={isGoodChart} decimals={decimals} enableCurveStepAfter={enableCurveStepAfter} isConsideredMobile={isConsideredMobile} chartValueLabel={chartValueLabel} margin={useMargin} data={values} />
+                            <OurChartVX isConsideredMobile={useConsideredMobile} areaFillKey={areaFillKey} isGoodChart={isGoodChart} decimals={decimals} enableCurveStepAfter={enableCurveStepAfter} chartValueLabel={chartValueLabel} margin={useMargin} data={values} />
                         </div>
                     </div>
                 </div>

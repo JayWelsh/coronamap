@@ -36,7 +36,7 @@ class OurChartVX extends React.Component {
             const d = xScale(x0) - xScale(xData(d0)) > xScale(xData(d1)) - xScale(x0) ? d1 : d0;
             const totalGraphWidth = xScale(xData(data[data.length - 1]));
             let tooltipLeft = xScale(xData(d));
-            if((totalGraphWidth - tooltipLeft) < 100){
+            if((totalGraphWidth - tooltipLeft) < 150){
                 this.setState({shiftTooltipLeft: true});
             }else{
                 this.setState({shiftTooltipLeft: false});
@@ -76,9 +76,7 @@ class OurChartVX extends React.Component {
         if(isGoodChart) {
             toGradient = 'green';
         }
-        console.log({toGradient});
 
-    
         if (data.length > 0) {
         
             const xAxisTickFunction = (val, i) => ({ fontSize: 14, fill: 'white' })
@@ -95,11 +93,11 @@ class OurChartVX extends React.Component {
             const maxTime = Math.max(...data.map(xData));
             const minTime = Math.min(...data.map(xData));
 
-            let formatDateTimeTooltip = timeFormat("%d %b %Y  |  %I:%M %p")
-            
-            let formatDateTimeTicker = timeFormat("%d %b %Y")
+            let formatDateTimeTooltip = timeFormat("%d %b %Y");
 
-            const numTicks = isConsideredMobile ? 3 : 4
+            let formatDateTimeTicker = isConsideredMobile ? timeFormat("%d/%m/%y") : timeFormat("%d %b %Y");
+
+            const numTicks = isConsideredMobile ? 3 : 4;
 
             const maxValuesData = [
                 {
@@ -149,7 +147,7 @@ class OurChartVX extends React.Component {
                             numTicks={numTicks}
                             className={"monospace"}
                         />
-                        <LinearGradient id={'area-fill-' + areaFillKey} from="#424242" to={isGoodChart ? "green" : "red"} fromOpacity={1} toOpacity={0} />
+                        <LinearGradient id={'area-fill-' + areaFillKey} from="black" to={isGoodChart ? "green" : "red"} fromOpacity={1} toOpacity={0} />
                         <PatternLines
                             id="dLines"
                             height={6}

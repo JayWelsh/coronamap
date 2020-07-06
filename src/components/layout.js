@@ -7,7 +7,7 @@ import Header from "./header"
 import "./layout.css"
 import "./leaflet.css"
 
-const Layout = ({ children, totalCases }) => {
+const Layout = ({ children, totalCases, totalRecovered, totalDead }) => {
   const data = useStaticQuery(graphql`
     query SiteTitleQuery {
       site {
@@ -19,10 +19,20 @@ const Layout = ({ children, totalCases }) => {
   `)
 
   let [useTotalCases, setTotalCases] = useState(false);
+  let [useTotalRecovered, setTotalRecovered] = useState(false);
+  let [useTotalDead, setTotalDead] = useState(false);
 
   useEffect(() => {
     setTotalCases(totalCases)
   }, [totalCases])
+
+  useEffect(() => {
+    setTotalRecovered(totalRecovered)
+  }, [totalRecovered])
+
+  useEffect(() => {
+    setTotalDead(totalDead)
+  }, [totalDead])
 
   const theme = createMuiTheme({
     palette: {
@@ -43,7 +53,7 @@ const Layout = ({ children, totalCases }) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Header totalCases={useTotalCases} siteTitle={data.site.siteMetadata.title} />
+      <Header totalCases={useTotalCases} totalRecovered={useTotalRecovered} totalDead={useTotalDead} siteTitle={data.site.siteMetadata.title} />
       <div
         style={{
           margin: `0 auto`,

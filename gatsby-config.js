@@ -3,6 +3,7 @@ module.exports = {
     title: `coronamap`,
     description: `Provincial Coronavirus Distribution Map of South Africa`,
     author: `@JayWelsh`,
+    image: '/images/site-preview.png'
   },
   plugins: [
     `gatsby-plugin-react-helmet`,
@@ -46,7 +47,28 @@ module.exports = {
       resolve: 'gatsby-plugin-react-leaflet',
       options: {
         linkStyles: false // (default: true) Enable/disable loading stylesheets via CDN
+      },
+    },
+    {
+      resolve: "gatsby-plugin-react-svg",
+      options: {
+        rule: {
+          include: /images/ // See below to configure properly
+        }
       }
+    },
+    {
+      resolve: `gatsby-plugin-google-analytics`,
+      options: {
+        // The property ID; the tracking code won't be generated without it
+        trackingId: "UA-161537585-1",
+        // Defines where to place the tracking script - `true` in the head and `false` in the body
+        head: false,
+        // Setting this parameter is optional
+        anonymize: true,
+        // Setting this parameter is also optional
+        respectDNT: true,
+      },
     }
   ],
 }

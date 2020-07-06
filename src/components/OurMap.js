@@ -36,7 +36,7 @@ let options = {
     zoomSnap: 0.5,
 }
 
-export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", prefersLightMode = false, hospitalData }) => {
+export const OurMap = ({ provincialAggregate, mapType = "bubble", prefersLightMode = false, hospitalData }) => {
 
     let [markers, setMarkers] = useState(false);
     let [hospitalMarkers, setHospitalMarkers] = useState(false);
@@ -59,14 +59,14 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
         let radiusDelta = maxRadius - minRadius;
         let reachMaxRadiusAt = 0;
         let { provinces } = SouthAfrica;
-        for(let provinceGroup of Object.keys(confirmedCasesGroupedByProvince)) {
-            if(confirmedCasesGroupedByProvince[provinceGroup].length > reachMaxRadiusAt) {
-                reachMaxRadiusAt = confirmedCasesGroupedByProvince[provinceGroup].length;
+        for(let provinceGroup of Object.keys(provincialAggregate)) {
+            if(provincialAggregate[provinceGroup] > reachMaxRadiusAt) {
+                reachMaxRadiusAt = provincialAggregate[provinceGroup];
             }
         }
         for (let province of Object.keys(provinces)) {
-            if (confirmedCasesGroupedByProvince[province]) {
-            let provinceCaseCount = confirmedCasesGroupedByProvince[province].length;
+            if (provincialAggregate[province]) {
+            let provinceCaseCount = provincialAggregate[province];
             let setRadius = minRadius + (((provinceCaseCount * 100 / reachMaxRadiusAt) / 100) * radiusDelta);
             markers.push({
                 position: provinces[province].position,
@@ -118,7 +118,7 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
         //     })
         // }
         // setHospitalMarkers(hospitalMarkers);
-    }, [confirmedCasesGroupedByProvince]);
+    }, [provincialAggregate]);
 
     const style = (feature) => {
         return {
@@ -135,8 +135,8 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
         if (feature.properties && feature.properties.NAME_1) {
             let provinceCaseCount = 0;
             let provinceName = feature.properties.NAME_1;
-            if(confirmedCasesGroupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]]) {
-                provinceCaseCount = confirmedCasesGroupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]].length;
+            if(provincialAggregate[SouthAfrica.provinceNameToAbbreviation[provinceName]]) {
+                provinceCaseCount = provincialAggregate[SouthAfrica.provinceNameToAbbreviation[provinceName]];
             }else{
                 provinceCaseCount = 0;
             }
@@ -159,16 +159,16 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
     
     const getColor = (provinceName) => {
         let infectionCount = 0;
-        if(confirmedCasesGroupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]]) {
-            infectionCount = confirmedCasesGroupedByProvince[SouthAfrica.provinceNameToAbbreviation[provinceName]].length;
+        if(provincialAggregate[SouthAfrica.provinceNameToAbbreviation[provinceName]]) {
+            infectionCount = provincialAggregate[SouthAfrica.provinceNameToAbbreviation[provinceName]];
         }
-        return  infectionCount > 250000  ? '#800026' :
-                infectionCount > 50000   ? '#bd0026' :
-                infectionCount > 15000   ? '#e31a1c' :
-                infectionCount > 5000    ? '#fc4e2a' :
-                infectionCount > 1000    ? '#fd8d3c' :
-                infectionCount > 250     ? '#feb24c' :
-                infectionCount > 50      ? '#fed976' :
+        return  infectionCount > 100000  ? '#800026' :
+                infectionCount > 75000   ? '#bd0026' :
+                infectionCount > 50000   ? '#e31a1c' :
+                infectionCount > 25000    ? '#fc4e2a' :
+                infectionCount > 10000    ? '#fd8d3c' :
+                infectionCount > 5000     ? '#feb24c' :
+                infectionCount > 1000      ? '#fed976' :
                 infectionCount >= 1      ? '#ffffcc' :
                 'darkgreen';
     }
@@ -185,29 +185,32 @@ export const OurMap = ({ confirmedCasesGroupedByProvince, mapType = "bubble", pr
                     {useMapType === "choropleth" && 
                         <Control position="bottomright">
                             <Paper style={{padding: '10px'}}>
-                                <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                                    <LegendColorSquare color={'#800026'}/>250k+
+                                <Typography className={"white-monospace line-height-1"} gutterBottom variant="h6" component="h2">
+                                    Cases
                                 </Typography>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                                    <LegendColorSquare color={'#bd0026'}/>50k-250k
+                                    <LegendColorSquare color={'#800026'}/>100000+
                                 </Typography>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                                    <LegendColorSquare color={'#e31a1c'}/>15k-50k
+                                    <LegendColorSquare color={'#bd0026'}/>75000-100000
                                 </Typography>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                                    <LegendColorSquare color={'#fc4e2a'}/>5k-15k
+                                    <LegendColorSquare color={'#e31a1c'}/>50000-75000
                                 </Typography>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                                    <LegendColorSquare color={'#fd8d3c'}/>1k-5k
+                                    <LegendColorSquare color={'#fc4e2a'}/>25000-50000
                                 </Typography>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                                    <LegendColorSquare color={'#feb24c'}/>250-1k
+                                    <LegendColorSquare color={'#fd8d3c'}/>10000-25000
                                 </Typography>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                                    <LegendColorSquare color={'#fed976'}/>50-250
+                                    <LegendColorSquare color={'#feb24c'}/>5000-10000
                                 </Typography>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
-                                    <LegendColorSquare color={'#ffffcc'}/>1-50
+                                    <LegendColorSquare color={'#fed976'}/>1000-5000
+                                </Typography>
+                                <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
+                                    <LegendColorSquare color={'#ffffcc'}/>1-1000
                                 </Typography>
                                 <Typography className={"white-monospace line-height-1"} variant="h6" component="h2">
                                     <LegendColorSquare color={'darkgreen'}/>0

@@ -7,7 +7,16 @@ import OurHorizontalBarChartVX from "./vx/OurHorizontalBarChartVX";
 import OurChartContainerVX from "./vx/OurChartContainerVX";
 import {isConsideredMobile} from "../utils";
 
-const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHeaderData = [], testingCasesTimeseries = []}) => {
+const OurChartCollection = ({
+    confirmedCasesGroupedByDate = [],
+    confirmedCasesHeaderData = [],
+    testingCasesTimeseries = [],
+    recoveryTimeseries = [],
+    deathTimeseries = [],
+    nationalAggregateTimeseries = [],
+    nationalActiveAggregateTimeseries = [],
+    provincialAggregateTimeline = [],
+}) => {
     const [provinceNewCasesHorizontalChartData, setProvinceNewCasesHorizontalChartData] = useState(false);
     const [provinceCumulativeCasesHorizontalChartData, setProvinceCumulativeCasesHorizontalChartData] = useState(false);
     const [newCasesLineChartData, setNewCasesLineChartData] = useState(false);
@@ -22,23 +31,25 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
         let dayBeforeDataSetStart = moment("20200304")
         for(let dateOfGroup of Object.keys(confirmedCasesGroupedByDate)) {
             for(let confirmedCase of confirmedCasesGroupedByDate[dateOfGroup]) {
-                let province = SouthAfrica.provinces[confirmedCase[indexOfProvince]].name;
-                if(provincesInData.indexOf(province) === -1) {
-                    provincesInData.push(province);
-                }
-                if(!provinceCumulativeCount[province]) {
-                    provinceCumulativeCount[province] = 1;
-                }else{
-                    provinceCumulativeCount[province] = provinceCumulativeCount[province] + 1;
-                }
-                if(!dateToCollection[dateOfGroup]) {
-                    dateToCollection[dateOfGroup] = {};
-                    dateToCollection[dateOfGroup][province] = 1;
-                } else {
-                    if(dateToCollection[dateOfGroup][province]) {
-                        dateToCollection[dateOfGroup][province] = dateToCollection[dateOfGroup][province] + 1;
+                if(SouthAfrica.provinces[confirmedCase[indexOfProvince]]){
+                    let province = SouthAfrica.provinces[confirmedCase[indexOfProvince]].name;
+                    if(provincesInData.indexOf(province) === -1) {
+                        provincesInData.push(province);
+                    }
+                    if(!provinceCumulativeCount[province]) {
+                        provinceCumulativeCount[province] = 1;
                     }else{
+                        provinceCumulativeCount[province] = provinceCumulativeCount[province] + 1;
+                    }
+                    if(!dateToCollection[dateOfGroup]) {
+                        dateToCollection[dateOfGroup] = {};
                         dateToCollection[dateOfGroup][province] = 1;
+                    } else {
+                        if(dateToCollection[dateOfGroup][province]) {
+                            dateToCollection[dateOfGroup][province] = dateToCollection[dateOfGroup][province] + 1;
+                        }else{
+                            dateToCollection[dateOfGroup][province] = 1;
+                        }
                     }
                 }
             }
@@ -71,15 +82,48 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             provinceCumulativeCasesHorizontalChartData.push({date: dateOfProvinceCases, ...datedProvinceCumulativeCounts[dateOfProvinceCases]})
         }
         let newCasesLineChartData = [{xAxisValue: dayBeforeDataSetStart, yAxisValue: 0}];
-        for(let dateOfGroup of Object.keys(dateToCollection)) {
+        nationalAggregateTimeseries.forEach((item, index) => {
             let dateTotal = 0;
-            for(let [key, value] of Object.entries(dateToCollection[dateOfGroup])) {
-                dateTotal += value;
+            if(nationalAggregateTimeseries[index - 1] && nationalAggregateTimeseries[index - 1].yAxisValue) {
+                dateTotal = nationalAggregateTimeseries[index].yAxisValue - nationalAggregateTimeseries[index - 1].yAxisValue;
             }
-            newCasesLineChartData.push({xAxisValue: moment(dateOfGroup), yAxisValue: dateTotal});
+            newCasesLineChartData.push({xAxisValue: item.xAxisValue, yAxisValue: dateTotal});
+        })
+        let overrideHorizontalCumulativeCases = [];
+        let overrideNewCasesHorizontalChartData = [];
+        for(let [index, item] of provincialAggregateTimeline.entries()) {
+            for(let timelineItemKey of Object.keys(item)) {
+                if(timelineItemKey !== "date"){
+                    let useProvinceName = "Unknown";
+                    if(SouthAfrica.provinces[timelineItemKey]){
+                        useProvinceName = SouthAfrica.provinces[timelineItemKey].name;
+                    }
+                    if(!overrideHorizontalCumulativeCases[index]) {
+                        overrideHorizontalCumulativeCases[index] = {};
+                    }
+                    if(!overrideNewCasesHorizontalChartData[index]) {
+                        overrideNewCasesHorizontalChartData[index] = {};
+                    }
+                    overrideHorizontalCumulativeCases[index][useProvinceName] = item[timelineItemKey];
+                    if(provincialAggregateTimeline[index - 1] && provincialAggregateTimeline[index - 1][timelineItemKey]){
+                        overrideNewCasesHorizontalChartData[index][useProvinceName] = item[timelineItemKey] - provincialAggregateTimeline[index - 1][timelineItemKey];
+                    }else{
+                        overrideNewCasesHorizontalChartData[index][useProvinceName]= item[timelineItemKey];
+                    }
+                }else{
+                    if(!overrideHorizontalCumulativeCases[index]) {
+                        overrideHorizontalCumulativeCases[index] = {};
+                    }
+                    overrideHorizontalCumulativeCases[index][timelineItemKey] = item[timelineItemKey];
+                    if(!overrideNewCasesHorizontalChartData[index]) {
+                        overrideNewCasesHorizontalChartData[index] = {};
+                    }
+                    overrideNewCasesHorizontalChartData[index][timelineItemKey] = item[timelineItemKey];
+                }
+            }
         }
-        setProvinceNewCasesHorizontalChartData(provinceNewCasesHorizontalChartData.reverse());
-        setProvinceCumulativeCasesHorizontalChartData(provinceCumulativeCasesHorizontalChartData.reverse());
+        setProvinceNewCasesHorizontalChartData(overrideNewCasesHorizontalChartData.reverse());
+        setProvinceCumulativeCasesHorizontalChartData(overrideHorizontalCumulativeCases.reverse());
         setCumulativeCasesLineChartData(cumulativeCasesLineChartData);
         setNewCasesLineChartData(newCasesLineChartData);
     }, [confirmedCasesGroupedByDate, confirmedCasesHeaderData, testingCasesTimeseries])
@@ -89,16 +133,21 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
         <Fragment>
             <h1 className="white-monospace center-text" style={{paddingTop: '25px'}}>Charts</h1>
             <div style={{...graphPadding}}>
-                {cumulativeCasesLineChartData && 
-                    <OurChartContainerVX areaFillKey={"cases-cumulative-linechart"} isUpGood={false} enableCurveStepAfter={false} chartTitle={"Cumulative Cases"} chartSubtitle={"South Africa"} chartData={cumulativeCasesLineChartData} chartValueLabel={"Cases"} />
+                {nationalActiveAggregateTimeseries && 
+                    <OurChartContainerVX decimals={0} areaFillKey={"active-cases-cumulative-linechart"} isUpGood={false} enableCurveStepAfter={false} chartTitle={"Active Cases"} chartSubtitle={"South Africa"} chartData={nationalActiveAggregateTimeseries} chartValueLabel={"Cases"} />
                 }
             </div>
-            <div style={{height: '600px'}}>
+            <div style={{...graphPadding, marginTop: '35px'}}>
+                {nationalAggregateTimeseries && 
+                    <OurChartContainerVX decimals={0} areaFillKey={"cases-cumulative-linechart"} isUpGood={false} enableCurveStepAfter={false} chartTitle={"Cumulative Cases"} chartSubtitle={"South Africa"} chartData={nationalAggregateTimeseries} chartValueLabel={"Cases"} />
+                }
+            </div>
+            <div style={{height: '1200px'}}>
                 {(provinceCumulativeCasesHorizontalChartData && provinceCumulativeCasesHorizontalChartData.length > 0) &&
                     <ParentSize className="graph-container">
                         {({ width: w, height: h }) => {
                             return (
-                                <OurHorizontalBarChartVX chartTitle={"Cumulative Cases"} singularLabel={"Cumulative Case"} pluralLabel={"Cumulative Cases"} colorRange={["#4DF21F", "#00F3FF", "#9999FF", "#D82DB9", "#AA1B1B", "#F4E3E3", "#00A57C", "#44FFD1", "#E8E16D"]} data={provinceCumulativeCasesHorizontalChartData} width={w} height={h}/>
+                                <OurHorizontalBarChartVX chartTitle={"Cumulative Cases"} singularLabel={"Cumulative Case"} pluralLabel={"Cumulative Cases"} colorRange={["#4DF21F", "#00F3FF", "#9999FF", "#D82DB9", "#AA1B1B", "#F4E3E3", "#FF5200", "#44FFD1", "#E8E16D", "#00A57C"]} data={provinceCumulativeCasesHorizontalChartData} width={w} height={h}/>
                             )
                         }}
                     </ParentSize>
@@ -106,21 +155,31 @@ const OurChartCollection = ({confirmedCasesGroupedByDate = [], confirmedCasesHea
             </div>
             <div style={{...graphPadding, marginTop: '115px'}}>
                 {newCasesLineChartData && 
-                    <OurChartContainerVX areaFillKey={"cases-new-linechart"} isChangeNeutral={true} enableCurveStepAfter={false} chartTitle={"New Cases"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New"} />
+                    <OurChartContainerVX decimals={0} areaFillKey={"cases-new-linechart"} isChangeNeutral={false} enableCurveStepAfter={false} chartTitle={"New Cases Per Day"} chartSubtitle={"South Africa"} chartData={newCasesLineChartData} chartValueLabel={"New"} />
                 }
             </div>
-            <div style={{height: '600px'}}>
+            <div style={{height: '1200px'}}>
                 {(provinceNewCasesHorizontalChartData && provinceNewCasesHorizontalChartData.length > 0) &&
                     <ParentSize className="graph-container">
                         {({ width: w, height: h }) => {
                             return (
-                                <OurHorizontalBarChartVX chartTitle={"New Cases"} singularLabel={"New Case"} pluralLabel={"New Cases"} colorRange={["#4DF21F", "#00F3FF", "#9999FF", "#D82DB9", "#AA1B1B", "#F4E3E3", "#00A57C", "#44FFD1", "#E8E16D"]} data={provinceNewCasesHorizontalChartData} width={w} height={h}/>
+                                <OurHorizontalBarChartVX chartTitle={"New Cases Per Day"} singularLabel={"New Case"} pluralLabel={"New Cases"} colorRange={["#4DF21F", "#00F3FF", "#9999FF", "#D82DB9", "#AA1B1B", "#F4E3E3", "#FF5200", "#44FFD1", "#E8E16D", "#00A57C"]} data={provinceNewCasesHorizontalChartData} width={w} height={h}/>
                             )
                         }}
                     </ParentSize>
                 }
             </div>
             <div style={{...graphPadding, marginTop: '115px'}}>
+                {recoveryTimeseries && 
+                    <OurChartContainerVX areaFillKey={"recovery-cumulative-linechart"} isGoodChart={true} isUpGood={true} decimals={0} enableCurveStepAfter={false} chartTitle={"Cumulative Recoveries"} chartSubtitle={"South Africa"} chartData={recoveryTimeseries} chartValueLabel={"Recoveries"} />
+                }
+            </div>
+            <div style={{...graphPadding, marginTop: '35px'}}>
+                {deathTimeseries && 
+                    <OurChartContainerVX areaFillKey={"deaths-cumulative-linechart"} decimals={0} enableCurveStepAfter={false} chartTitle={"Cumulative Deaths"} chartSubtitle={"South Africa"} chartData={deathTimeseries} chartValueLabel={"Deaths"} />
+                }
+            </div>
+            <div style={{...graphPadding, marginTop: '35px'}}>
                 {testingCasesTimeseries && 
                     <OurChartContainerVX areaFillKey={"testing-cumulative-linechart"} isGoodChart={true} isUpGood={true} decimals={0} enableCurveStepAfter={false} chartTitle={"Cumulative Testing"} chartSubtitle={"South Africa"} chartData={testingCasesTimeseries} chartValueLabel={"Tests"} />
                 }

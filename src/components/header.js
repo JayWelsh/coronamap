@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import MenuIcon from '@material-ui/icons/Menu';
+import { valueFormatDisplay } from '../utils';
 
 const styles = {
   root: {
@@ -47,7 +47,7 @@ class Header extends React.Component {
   }
 
   render() {
-    const { classes, totalCases } = this.props;
+    const { classes, totalCases, totalRecovered, totalDead } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
     return (
@@ -68,9 +68,29 @@ class Header extends React.Component {
                 </Typography>
               </Link>
             </div>
-            <Typography className={"white-monospace"} variant="h5" component="h2">
-              {totalCases} cases
-            </Typography>
+            <div style={{textAlign: 'right'}}>
+              {totalCases &&
+                <div style={{color: 'orange'}}>
+                  <Typography className={"monospace"} style={{lineHeight: '1'}} variant="h6" component="h2">
+                    {valueFormatDisplay(totalCases, 0)}&nbsp;cases
+                  </Typography>
+                </div>
+              }
+              {totalRecovered &&
+                <div style={{color: '#4ef21f'}}>
+                  <Typography className={"monospace"} style={{lineHeight: '1'}} variant="h6" component="h2">
+                    {valueFormatDisplay(totalRecovered, 0)}&nbsp;recoveries
+                  </Typography>
+                </div>
+              }
+              {totalDead &&
+                <div style={{color: 'red'}}>
+                  <Typography className={"monospace"} style={{lineHeight: '1'}} variant="h6" component="h2">
+                    {valueFormatDisplay(totalDead, 0)}&nbsp;deaths
+                  </Typography>
+                </div>
+              }
+            </div>
           </Toolbar>
         </AppBar>
       </div>

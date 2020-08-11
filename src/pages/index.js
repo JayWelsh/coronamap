@@ -244,7 +244,9 @@ const IndexPage = () => {
 
           useProvincialAggregateTimeline.push({date: date,...provinceToRunningTotal});
           useNationalAggregateTimeseries.push({xAxisValue: moment(date), yAxisValue: runningTotal});
-          useNationalActiveAggregateTimeseries.push({xAxisValue: moment(date), yAxisValue: runningTotalActive});
+          if(dateToTotalRecovered[date] && dateToTotalDeaths[date]){
+            useNationalActiveAggregateTimeseries.push({xAxisValue: moment(date), yAxisValue: runningTotalActive});
+          }
           useProvincialAggregate = provinceToRunningTotal;
           currentTotalCases = runningTotal;
         }
